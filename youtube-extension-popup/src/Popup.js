@@ -4,11 +4,12 @@ import Modal from "./components/modal";
 export class Popup extends React.Component {
   constructor(props) {
     super(props);
-
     this.state = {
       message: "",
       config: undefined,
       selectedVideosList: [],
+      sid: "",
+      content: ""
     };
     this.onCloseWindow = this.onCloseWindow.bind(this);
   }
@@ -21,17 +22,21 @@ export class Popup extends React.Component {
       "*"
     );
     const receiveMessage = ({ data }) => {
+      console.log("popup data recieved >>>>>>", data)
       if (data.config) {
         this.setState({
           message: data.message,
           config: data.config,
         });
       }
+      
       if (data.selectedVideos) {
         this.setState({
           message: data.message,
-          selectedVideosList: data.selectedVideos,
-        });
+          selectedVideosList: data.selectedVideos.videos,
+          sid: data.selectedVideos.sid,
+          content: data.selectedVideos.content
+        })
       }
     };
     window.addEventListener("message", receiveMessage, false);
@@ -55,7 +60,9 @@ export class Popup extends React.Component {
   };
 
   render() {
-    const { config, selectedVideosList } = this.state;
+    const { config, selectedVideosList, sid, content } = this.state;
+    console.log("sid here in popup >>>>>", sid, content)
+    console.log('config before modal>>>',config)
     return (
       <div>
         {config && (
@@ -63,6 +70,8 @@ export class Popup extends React.Component {
             config={config}
             closeWindow={this.onCloseWindow}
             selectedVideos={selectedVideosList}
+            sid={sid}
+            content={content}
           />
         )}
       </div>

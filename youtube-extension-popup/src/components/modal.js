@@ -14,11 +14,12 @@ export default class Modal extends React.PureComponent {
       isGrid: true,
       searchQuery: "",
       renderVideos: [],
-      errorFound:false,
+      errorFound: false,
       isSelected: false,
       nextPageToken: undefined,
       initialReqVideo: undefined,
       selectedVideoList: props.selectedVideos,
+      apiv3Url: ""
     };
     this.loadMore = this.loadMore.bind(this);
     this.changeLayout = this.changeLayout.bind(this);
@@ -51,14 +52,15 @@ export default class Modal extends React.PureComponent {
   };
 
   componentDidMount() {
-    const { config } = this.props;
+    const { config, sid, content } = this.props;
+    console.log("in modal in mount sid and content >>>>", sid, content)
     Youtube.initalizingVideoList(config)
       .then((videoList) => {
         videoList.data.items.length + 1 >=
           videoList.data.pageInfo.totalResults &&
           (document.getElementsByClassName("load-more")[0].style.display =
             "none");
-        const errorFound = videoList.data.items.length === 0? true:false;
+        const errorFound = videoList.data.items.length === 0 ? true : false;
         this.setState({
           initialReqVideo: videoList.data,
           renderVideos: videoList.data.items,
@@ -69,7 +71,7 @@ export default class Modal extends React.PureComponent {
       .catch((err) => {
         console.log(err);
         this.setState({
-          errorFound:true
+          errorFound: true
         })
       });
   }
@@ -108,7 +110,7 @@ export default class Modal extends React.PureComponent {
           newVideos = newVideos.concat(videoList.data.items);
           newVideos.length + 1 >= initialReqVideo.pageInfo.totalResults &&
             (event.target.style.display = "none");
-          const errorFound = newVideos.length === 0? true:false
+          const errorFound = newVideos.length === 0 ? true : false
           this.setState({
             renderVideos: newVideos,
             nextPageToken: videoList.data.nextPageToken,
@@ -117,7 +119,7 @@ export default class Modal extends React.PureComponent {
         })
         .catch((err) => {
           console.log(err);
-          this.setState({errorFound:true})
+          this.setState({ errorFound: true })
         });
     } else {
       event.target.style.display = "none";
@@ -161,7 +163,7 @@ export default class Modal extends React.PureComponent {
     this.setState({ searchQuery: query });
     if (event.charCode === 13) {
       Youtube.initializeSearchField(config, query).then((queryVideos) => {
-        const errorFound = queryVideos.data.items.length === 0? true:false
+        const errorFound = queryVideos.data.items.length === 0 ? true : false
         this.setState({
           initialReqVideo: queryVideos.data,
           renderVideos: queryVideos.data.items,
@@ -185,105 +187,114 @@ export default class Modal extends React.PureComponent {
   };
 
   render() {
-    const { renderVideos, selectedVideoList, initialReqVideo, isSelected, errorFound } =
+    const { renderVideos, selectedVideoList, initialReqVideo, isSelected, errorFound, apiv3Url } =
       this.state;
+    console.log("apiV3Url in modal is >>>>>>>", apiv3Url)
+    // let localData = localStorage.getItem("local_apiv3Url")
+    // localData = JSON.parse(localData)
     return (
       <div className="modal display-block">
-        <section className="modal-main">
-          {this.props.children}
-          <div className="modal-header">
-            <h2>Select Video</h2>
-          </div>
-          <div className="search-bar">
-            <div className="cs-form-group search-box no-margin">
-              <span className="search-input">
-                <input
-                  type="search"
-                  id="search"
-                  className="cs-text-box cs-global-search"
-                  placeholder="Search Videos"
-                  onKeyPress={this.searchQueryHandler}
-                />
-              </span>
-              <span className="search-icon" onClick={this.fetchQueryVideos}>
-                <i className="icon-search"></i>
-              </span>
+        {apiv3Url ? (
+          <section className="modal-main">
+            {this.props.children}
+            <div className="modal-header">
+              <h2>Select Video</h2>
             </div>
-          </div>
-          <div className="modal-body">
-            <div className="video-section">
-              <span>All Videos</span>
-              <div className="icons">
-                <img
-                  src={refreshIcon}
-                  alt="refresh-icon"
-                  onClick={this.refreshHandler}
-                />
-                <img
-                  src={this.state.isGrid ? gridIcon : listIcon}
-                  onClick={this.changeLayout}
-                  alt="view-option"
-                />
+            <div className="search-bar">
+              <div className="cs-form-group search-box no-margin">
+                <span className="search-input">
+                  <input
+                    type="search"
+                    id="search"
+                    className="cs-text-box cs-global-search"
+                    placeholder="Search Videos"
+                    onKeyPress={this.searchQueryHandler}
+                  />
+                </span>
+                <span className="search-icon" onClick={this.fetchQueryVideos}>
+                  <i className="icon-search"></i>
+                </span>
               </div>
             </div>
-            <div className="video-section">
-              {this.state.isSelected ? (
-                <span className="select-count" onClick={this.showAllVideos}>
-                  Show all videos({initialReqVideo?.pageInfo.totalResults})
+            <div className="modal-body">
+              <div className="video-section">
+                <span>All Videos</span>
+                <div className="icons">
+                  <img
+                    src={refreshIcon}
+                    alt="refresh-icon"
+                    onClick={this.refreshHandler}
+                  />
+                  <img
+                    src={this.state.isGrid ? gridIcon : listIcon}
+                    onClick={this.changeLayout}
+                    alt="view-option"
+                  />
+                </div>
+              </div>
+              <div className="video-section">
+                {this.state.isSelected ? (
+                  <span className="select-count" onClick={this.showAllVideos}>
+                    Show all videos({initialReqVideo?.pageInfo.totalResults})
+                  </span>
+                ) : (
+                  <span
+                    className="select-count"
+                    onClick={this.showSelectedVideos}
+                  >
+                    Show selected videos({selectedVideoList.length})
+                  </span>
+                )}
+                <span className="video-count">
+                  showing {renderVideos.length} of{" "}
+                  {initialReqVideo?.pageInfo.totalResults} videos
                 </span>
+              </div>
+              {this.state.isGrid ? (
+                <GridLayout
+                  videos={renderVideos}
+                  isSelected={isSelected}
+                  checkFiles={errorFound}
+                  loadContent={this.loadMore}
+                  handleSelect={this.selectingVideos}
+                  selectedVideoList={selectedVideoList}
+                  totalVideos={initialReqVideo && initialReqVideo.pageInfo.totalResults}
+                />
               ) : (
-                <span
-                  className="select-count"
-                  onClick={this.showSelectedVideos}
-                >
-                  Show selected videos({selectedVideoList.length})
-                </span>
+                <ListLayout
+                  videos={renderVideos}
+                  isSelected={isSelected}
+                  checkFiles={errorFound}
+                  loadContent={this.loadMore}
+                  handleSelect={this.selectingVideos}
+                  selectedVideoList={selectedVideoList}
+                  totalVideos={initialReqVideo && initialReqVideo.pageInfo.totalResults}
+                />
               )}
-              <span className="video-count">
-                showing {renderVideos.length} of{" "}
-                {initialReqVideo?.pageInfo.totalResults} videos
-              </span>
             </div>
-            {this.state.isGrid ? (
-              <GridLayout
-                videos={renderVideos}
-                isSelected={isSelected}
-                checkFiles = {errorFound}
-                loadContent={this.loadMore}
-                handleSelect={this.selectingVideos}
-                selectedVideoList={selectedVideoList}
-                totalVideos={initialReqVideo && initialReqVideo.pageInfo.totalResults}
-              />
-            ) : (
-              <ListLayout
-                videos={renderVideos}
-                isSelected={isSelected}
-                checkFiles = {errorFound}
-                loadContent={this.loadMore}
-                handleSelect={this.selectingVideos}
-                selectedVideoList={selectedVideoList}
-                totalVideos={initialReqVideo && initialReqVideo.pageInfo.totalResults}
-              />
-            )}
-          </div>
 
-          <div className="modal-footer">
-            <div className="right">
-              <button
-                className="cancel-btn btn"
-                onClick={() => this.sendAndClose(false)}
-              >
-                Cancel
-              </button>
-              <button
-                className="add-btn btn"
-                onClick={() => this.sendAndClose(true)}
-              >
-                Add Selected Videos {selectedVideoList.length}
-              </button>
+            <div className="modal-footer">
+              <div className="right">
+                <button
+                  className="cancel-btn btn"
+                  onClick={() => this.sendAndClose(false)}
+                >
+                  Cancel
+                </button>
+                <button
+                  className="add-btn btn"
+                  onClick={() => this.sendAndClose(true)}
+                >
+                  Add Selected Videos {selectedVideoList.length}
+                </button>
+              </div>
             </div>
-          </div>
-        </section>
+          </section>
+        ) : (
+          <section className="modal-main">
+            <p>Login will be here </p>
+          </section>
+        )}
       </div>
     );
   }

@@ -38,7 +38,8 @@ export class WindowOpener extends React.Component {
   }
   // opens a child
   onClickHandler() {
-    const { url, name, opts, videos } = this.props;
+    const { url, name, opts, videos, sid, content } = this.props;
+    console.log("sid and content in window opener >>>>", sid, content)
     // if there is  already a child open, let's set focus on it
     if (popup && !popup.closed) {
       popup.focus();
@@ -52,7 +53,14 @@ export class WindowOpener extends React.Component {
       // The opener object is created once and only if a window has a parent
       // popup.opener.onOpen({message:"Opening YouTube Popup"});
       popup.opener.postMessage(
-        { message: "Opening YouTube Popup", selectedVideos: videos },
+        {
+          message: "Opening YouTube Popup",
+          selectedVideos: {
+            videos: videos,
+            sid: sid,
+            content: content
+          }
+        },
         "*"
       );
     }, 0);

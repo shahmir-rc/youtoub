@@ -14,6 +14,8 @@ export class Home extends React.Component {
       message: "",
       videoList: [],
       config: {},
+      sid: "",
+      content: ""
     };
     this.sonResponse = this.sonResponse.bind(this);
     this.deleteVideo = this.deleteVideo.bind(this);
@@ -23,45 +25,60 @@ export class Home extends React.Component {
     ContentstackUIExtension.init().then((extension) => {
       console.log("extension here from ui extension >>>>>>>>", extension)
       const { items } = extension.field.getData();
+      console.log("items here >>>>>> from field", items)
       extension.window.enableAutoResizing();
+      // let localData = localStorage.getItem("local_sid")
+      // localData = JSON.parse(localData)
       if (items && typeof items[0] !== "object") {
-        Youtube.initalizingVideoList(extension.config, items.toString())
-          .then((videoList) => {
-            console.log("data here from youtube >>>>>>", videoList)
-            const modifiedVideo = videoList.data.items.map((video) => {
-              let newVideo = video;
-              newVideo["id"] = { kind: "youtube#video", videoId: video.id };
-              return newVideo;
-            });
-            this.setState(
-              {
-                config: extension.config,
-                videoList: modifiedVideo,
-              },
-              () => {
-                this.extension = extension;
-                extension.window.enableAutoResizing();
-              }
-            );
-          })
-          .catch((err) => {
-            console.log(err);
-          });
+        // Youtube.initalizingVideoList(extension.config, items.toString())
+        //   .then((videoList) => {
+        //     console.log("data here from youtube >>>>>>", videoList)
+        //     const modifiedVideo = videoList.data.items.map((video) => {
+        //       let newVideo = video;
+        //       newVideo["id"] = { kind: "youtube#video", videoId: video.id };
+        //       return newVideo;
+        //     });
+        //     this.setState(
+        //       {
+        //         config: extension.config,
+        //         videoList: modifiedVideo,
+        //       },
+        //       () => {
+        //         this.extension = extension;
+        //         extension.window.enableAutoResizing();
+        //       }
+        //     );
+        //   })
+        //   .catch((err) => {
+        //     console.log(err);
+        //   });
         Bank.initalizingAssetList(extension.config, items.toString()).then((res) => {
           console.log("if response from bank here >>>>>>>", res)
+          // localStorage.setItem("local_sid", JSON.stringify(res.data))
+          this.setState(
+            {
+              config: extension.config,
+              videoList: items || [],
+              sid: res.data.SID,
+              content: res.data.content
+            },
+            () => {
+              this.extension = extension;
+              extension.window.enableAutoResizing();
+            }
+          );
+
         }).catch((er) => {
           console.log("if er from bank here >>>>", er)
         })
       } else {
-        Bank.initalizingAssetList(extension.config, items.toString()).then((res) => {
-          console.log("else response from bank here >>>>>>>", res)
-        }).catch((er) => {
-          console.log("else er from bank here >>>>", er)
-        })
+        console.log("else statement executed unkown causes")
         this.setState(
           {
             config: extension.config,
             videoList: items || [],
+            // sid: localData.SID,
+            // content: localData.content
           },
           () => {
             this.extension = extension;
@@ -72,16 +89,19 @@ export class Home extends React.Component {
     });
 
     const receiveMessage = (event) => {
-      console.log("event from receive message >>>>>", event)
       const { data } = event;
-      const { videoList } = this.state;
+      const { videoList, sid, content } = this.state;
       if (data.getConfig) {
         const { config } = this.state;
         event.source.postMessage(
           {
             message: "Sending Config files",
             config,
-            selectedVideos: videoList,
+            selectedVideos: {
+              videos: videoList,
+              sid: sid,
+              content: content
+            }
           },
           event.origin
         );
@@ -130,7 +150,8 @@ export class Home extends React.Component {
   };
 
   render() {
-    const { videoList, config } = this.state;
+    const { videoList, config, sid, content } = this.state;
+    console.log("sid and content in home >>>>>", sid, content)
     return (
       <header className="App-header">
         <div className="wrapper">
@@ -193,6 +214,8 @@ export class Home extends React.Component {
             url={config.redirectUrl}
             bridge={this.sonResponse}
             videos={videoList}
+            sid={sid}
+            content={content}
           >
             Choose Assets
           </WindowOpener>
