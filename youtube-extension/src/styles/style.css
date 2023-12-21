@@ -307,7 +307,3 @@ body {
 .close-icon:after {
   transform: rotate(-45deg);
 }
-
-iframe{
-  z-index: 1000 !important;
-}

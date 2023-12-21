@@ -3,7 +3,6 @@ import React from "react";
 import Modal from "./components/modal";
 export class Popup extends React.Component {
   constructor(props) {
-    console.log("props here in pop js")
     super(props);
 
     this.state = {
@@ -40,18 +39,18 @@ export class Popup extends React.Component {
   onCloseWindow = (selectedVideos) => {
     selectedVideos.length > 0
       ? window.opener.postMessage(
-          {
-            message: "sending selected videos",
-            selectedVideosList: selectedVideos,
-          },
-          "*"
-        )
+        {
+          message: "sending selected videos",
+          selectedVideosList: selectedVideos,
+        },
+        "*"
+      )
       : window.opener.postMessage(
-          {
-            message: "Window closed sending selected videos",
-          },
-          "*"
-        );
+        {
+          message: "Window closed sending selected videos",
+        },
+        "*"
+      );
     window.close();
   };
 

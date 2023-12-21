@@ -69,7 +69,6 @@ export class WindowOpener extends React.Component {
     const { children } = this.props;
     return (
       <button
-        style={{ zIndex: "1001" , position:"relative" }}
         className="choose_btn"
         type="choose_btn"
         onClick={this.onClickHandler}

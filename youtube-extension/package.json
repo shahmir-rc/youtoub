@@ -8,7 +8,7 @@
     "@testing-library/jest-dom": "^5.11.4",
     "@testing-library/react": "^11.1.0",
     "@testing-library/user-event": "^12.1.10",
-    "axios": "^1.6.2",
+    "axios": "^0.21.1",
     "gulp-inline-source": "^4.0.0",
     "gulp-replace": "^1.1.2",
     "react": "^17.0.2",
@@ -16,7 +16,7 @@
     "react-dragula": "^1.1.17",
     "react-router": "^5.2.0",
     "react-router-dom": "^5.2.0",
-    "react-scripts": "^3.0.1",
+    "react-scripts": "4.0.3",
     "web-vitals": "^1.0.1"
   },
   "scripts": {

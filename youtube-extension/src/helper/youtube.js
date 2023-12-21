@@ -8,6 +8,7 @@ class Youtube {
   }
 
   getSelectedVideos(videoIds) {
+    console.log("video ids here >>>>>> ", videoIds)
     const setting = this;
     return new Promise((resolve, reject) => {
       try {
@@ -29,6 +30,7 @@ class Youtube {
 
 export default {
   async initalizingVideoList(config, selectedVideos) {
+    console.log("config and selected videos here >>>>>>",selectedVideos)
     const youtube = new Youtube(config);
     return await youtube.getSelectedVideos(selectedVideos);
   },

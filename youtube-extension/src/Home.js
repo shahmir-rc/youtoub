@@ -5,9 +5,9 @@ import Dragula from "react-dragula";
 import Youtube from "./helper/youtube";
 import { WindowOpener } from "./components/window-opener";
 import ContentstackUIExtension from "@contentstack/ui-extensions-sdk";
+import Bank from "./helper/bank";
 export class Home extends React.Component {
   constructor(props) {
-    console.log("props here >>>>",props)
     super(props);
     this.extension = {};
     this.state = {
@@ -18,15 +18,16 @@ export class Home extends React.Component {
     this.sonResponse = this.sonResponse.bind(this);
     this.deleteVideo = this.deleteVideo.bind(this);
   }
+
   componentDidMount() {
-    console.log("in mount >>>>",ContentstackUIExtension)
     ContentstackUIExtension.init().then((extension) => {
-      console.log("extension data here >>>>>",extension)
+      console.log("extension here from ui extension >>>>>>>>", extension)
       const { items } = extension.field.getData();
       extension.window.enableAutoResizing();
       if (items && typeof items[0] !== "object") {
         Youtube.initalizingVideoList(extension.config, items.toString())
           .then((videoList) => {
+            console.log("data here from youtube >>>>>>", videoList)
             const modifiedVideo = videoList.data.items.map((video) => {
               let newVideo = video;
               newVideo["id"] = { kind: "youtube#video", videoId: video.id };
@@ -46,7 +47,17 @@ export class Home extends React.Component {
           .catch((err) => {
             console.log(err);
           });
+        Bank.initalizingAssetList(extension.config, items.toString()).then((res) => {
+          console.log("if response from bank here >>>>>>>", res)
+        }).catch((er) => {
+          console.log("if er from bank here >>>>", er)
+        })
       } else {
+        Bank.initalizingAssetList(extension.config, items.toString()).then((res) => {
+          console.log("else response from bank here >>>>>>>", res)
+        }).catch((er) => {
+          console.log("else er from bank here >>>>", er)
+        })
         this.setState(
           {
             config: extension.config,
@@ -58,11 +69,10 @@ export class Home extends React.Component {
           }
         );
       }
-    }).catch((error)=>{
-      console.log("error here >>>",error)
-    })
+    });
 
     const receiveMessage = (event) => {
+      console.log("event from receive message >>>>>", event)
       const { data } = event;
       const { videoList } = this.state;
       if (data.getConfig) {
@@ -184,7 +194,7 @@ export class Home extends React.Component {
             bridge={this.sonResponse}
             videos={videoList}
           >
-            Choose Asset
+            Choose Assets
           </WindowOpener>
         </div>
       </header>
