@@ -27,6 +27,40 @@ export default class Modal extends React.PureComponent {
     this.selectingVideos = this.selectingVideos.bind(this);
     this.fetchQueryVideos = this.fetchQueryVideos.bind(this);
     this.searchQueryHandler = this.searchQueryHandler.bind(this);
+    this.userLogin = this.userLogin.bind(this);
+  }
+
+  componentDidUpdate(prevProps) {
+    // Check if the prop containing API data has changed
+    if (prevProps.sid !== this.props.sid) {
+      // Make your API call here using this.props.apiData
+      console.log("here is the updated sid in modal >>>>", this.props.sid)
+    }
+  }
+
+  userLogin() {
+    const { content, config } = this.props
+    console.log("props here >>>>",this.props)
+    const requestUrl = `${content}/webapp/1.0/login`;
+    var myHeaders = new Headers();
+    myHeaders.append("Content-Type", "application/x-www-form-urlencoded");
+
+    var urlencoded = new URLSearchParams();
+    urlencoded.append("p70", "barathkumar.j@royalcyber.com");
+    urlencoded.append("p80", "Barath@2023");
+    urlencoded.append("p90", `${config.platformUrl}`);
+
+    var requestOptions = {
+      method: 'POST',
+      headers: myHeaders,
+      body: urlencoded,
+      redirect: 'follow'
+    };
+
+    fetch(requestUrl, requestOptions)
+      .then(response => response.text())
+      .then(result => console.log("result here from api 2 in modal >>>>", result))
+      .catch(error => console.log('error here from api 2 in modal >>>>', error));
   }
 
   selectingVideos = (selectedVideos) => {
@@ -128,6 +162,7 @@ export default class Modal extends React.PureComponent {
 
   sendAndClose = (closeandsend) => {
     const { selectedVideoList } = this.state;
+    console.log("selected video list in modal are >>>>>")
     closeandsend
       ? this.props.closeWindow(selectedVideoList)
       : this.props.closeWindow([]);
@@ -292,7 +327,7 @@ export default class Modal extends React.PureComponent {
           </section>
         ) : (
           <section className="modal-main">
-            <p>Login will be here </p>
+            <p onClick={this.userLogin}>Login will be here </p>
           </section>
         )}
       </div>
