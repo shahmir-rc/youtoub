@@ -30,21 +30,13 @@ export default class Modal extends React.PureComponent {
     this.userLogin = this.userLogin.bind(this);
   }
 
-  componentDidUpdate(prevProps) {
-    // Check if the prop containing API data has changed
-    if (prevProps.sid !== this.props.sid) {
-      // Make your API call here using this.props.apiData
-      console.log("here is the updated sid in modal >>>>", this.props.sid)
-    }
-  }
-
   userLogin() {
-    const { content, config } = this.props
-    console.log("props here >>>>",this.props)
-    const requestUrl = `${content}/webapp/1.0/login`;
+    const { config } = this.props
+    const requestUrl = `${`https://apiau.intelligencebank.com`}/webapp/1.0/login`;
     var myHeaders = new Headers();
     myHeaders.append("Content-Type", "application/x-www-form-urlencoded");
 
+    // hard coded data below
     var urlencoded = new URLSearchParams();
     urlencoded.append("p70", "barathkumar.j@royalcyber.com");
     urlencoded.append("p80", "Barath@2023");
@@ -86,8 +78,7 @@ export default class Modal extends React.PureComponent {
   };
 
   componentDidMount() {
-    const { config, sid, content } = this.props;
-    console.log("in modal in mount sid and content >>>>", sid, content)
+    const { config } = this.props;
     Youtube.initalizingVideoList(config)
       .then((videoList) => {
         videoList.data.items.length + 1 >=
@@ -162,7 +153,6 @@ export default class Modal extends React.PureComponent {
 
   sendAndClose = (closeandsend) => {
     const { selectedVideoList } = this.state;
-    console.log("selected video list in modal are >>>>>")
     closeandsend
       ? this.props.closeWindow(selectedVideoList)
       : this.props.closeWindow([]);
@@ -224,9 +214,6 @@ export default class Modal extends React.PureComponent {
   render() {
     const { renderVideos, selectedVideoList, initialReqVideo, isSelected, errorFound, apiv3Url } =
       this.state;
-    console.log("apiV3Url in modal is >>>>>>>", apiv3Url)
-    // let localData = localStorage.getItem("local_apiv3Url")
-    // localData = JSON.parse(localData)
     return (
       <div className="modal display-block">
         {apiv3Url ? (
