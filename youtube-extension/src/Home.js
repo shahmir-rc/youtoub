@@ -2,7 +2,6 @@
 import React from "react";
 import "./styles/style.css";
 import Dragula from "react-dragula";
-import Youtube from "./helper/youtube";
 import { WindowOpener } from "./components/window-opener";
 import ContentstackUIExtension from "@contentstack/ui-extensions-sdk";
 import Bank from "./helper/bank";
@@ -23,38 +22,10 @@ export class Home extends React.Component {
 
   componentDidMount() {
     ContentstackUIExtension.init().then((extension) => {
-      console.log("extension here from ui extension >>>>>>>>", extension)
       const { items } = extension.field.getData();
-      console.log("items here >>>>>> from field", items)
       extension.window.enableAutoResizing();
-      // let localData = localStorage.getItem("local_sid")
-      // localData = JSON.parse(localData)
       if (items && typeof items[0] !== "object") {
-        // Youtube.initalizingVideoList(extension.config, items.toString())
-        //   .then((videoList) => {
-        //     console.log("data here from youtube >>>>>>", videoList)
-        //     const modifiedVideo = videoList.data.items.map((video) => {
-        //       let newVideo = video;
-        //       newVideo["id"] = { kind: "youtube#video", videoId: video.id };
-        //       return newVideo;
-        //     });
-        //     this.setState(
-        //       {
-        //         config: extension.config,
-        //         videoList: modifiedVideo,
-        //       },
-        //       () => {
-        //         this.extension = extension;
-        //         extension.window.enableAutoResizing();
-        //       }
-        //     );
-        //   })
-        //   .catch((err) => {
-        //     console.log(err);
-        //   });
         Bank.initalizingAssetList(extension.config, items.toString()).then((res) => {
-          console.log("if response from bank here >>>>>>>", res)
-          // localStorage.setItem("local_sid", JSON.stringify(res.data))
           this.setState(
             {
               config: extension.config,
@@ -72,13 +43,10 @@ export class Home extends React.Component {
           console.log("if er from bank here >>>>", er)
         })
       } else {
-        console.log("else statement executed unkown causes")
         this.setState(
           {
             config: extension.config,
             videoList: items || [],
-            // sid: localData.SID,
-            // content: localData.content
           },
           () => {
             this.extension = extension;
@@ -150,8 +118,7 @@ export class Home extends React.Component {
   };
 
   render() {
-    const { videoList, config, sid, content } = this.state;
-    console.log("sid and content in home >>>>>", sid, content)
+    const { videoList, config } = this.state;
     return (
       <header className="App-header">
         <div className="wrapper">
@@ -214,8 +181,6 @@ export class Home extends React.Component {
             url={config.redirectUrl}
             bridge={this.sonResponse}
             videos={videoList}
-            sid={sid}
-            content={content}
           >
             Choose Assets
           </WindowOpener>

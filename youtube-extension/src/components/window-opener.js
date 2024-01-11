@@ -38,8 +38,7 @@ export class WindowOpener extends React.Component {
   }
   // opens a child
   onClickHandler() {
-    const { url, name, opts, videos, sid, content } = this.props;
-    console.log("sid and content in window opener >>>>", sid, content)
+    const { url, name, opts, videos } = this.props;
     // if there is  already a child open, let's set focus on it
     if (popup && !popup.closed) {
       popup.focus();
@@ -57,8 +56,6 @@ export class WindowOpener extends React.Component {
           message: "Opening YouTube Popup",
           selectedVideos: {
             videos: videos,
-            sid: sid,
-            content: content
           }
         },
         "*"
