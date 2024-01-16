@@ -14,11 +14,12 @@ export default class Modal extends React.PureComponent {
       isGrid: true,
       searchQuery: "",
       renderVideos: [],
-      errorFound:false,
+      errorFound: false,
       isSelected: false,
       nextPageToken: undefined,
       initialReqVideo: undefined,
       selectedVideoList: props.selectedVideos,
+      sessionID: ""
     };
     this.loadMore = this.loadMore.bind(this);
     this.changeLayout = this.changeLayout.bind(this);
@@ -58,7 +59,7 @@ export default class Modal extends React.PureComponent {
           videoList.data.pageInfo.totalResults &&
           (document.getElementsByClassName("load-more")[0].style.display =
             "none");
-        const errorFound = videoList.data.items.length === 0? true:false;
+        const errorFound = videoList.data.items.length === 0 ? true : false;
         this.setState({
           initialReqVideo: videoList.data,
           renderVideos: videoList.data.items,
@@ -69,7 +70,7 @@ export default class Modal extends React.PureComponent {
       .catch((err) => {
         console.log(err);
         this.setState({
-          errorFound:true
+          errorFound: true
         })
       });
   }
@@ -108,7 +109,7 @@ export default class Modal extends React.PureComponent {
           newVideos = newVideos.concat(videoList.data.items);
           newVideos.length + 1 >= initialReqVideo.pageInfo.totalResults &&
             (event.target.style.display = "none");
-          const errorFound = newVideos.length === 0? true:false
+          const errorFound = newVideos.length === 0 ? true : false
           this.setState({
             renderVideos: newVideos,
             nextPageToken: videoList.data.nextPageToken,
@@ -117,7 +118,7 @@ export default class Modal extends React.PureComponent {
         })
         .catch((err) => {
           console.log(err);
-          this.setState({errorFound:true})
+          this.setState({ errorFound: true })
         });
     } else {
       event.target.style.display = "none";
@@ -161,7 +162,7 @@ export default class Modal extends React.PureComponent {
     this.setState({ searchQuery: query });
     if (event.charCode === 13) {
       Youtube.initializeSearchField(config, query).then((queryVideos) => {
-        const errorFound = queryVideos.data.items.length === 0? true:false
+        const errorFound = queryVideos.data.items.length === 0 ? true : false
         this.setState({
           initialReqVideo: queryVideos.data,
           renderVideos: queryVideos.data.items,
@@ -185,11 +186,12 @@ export default class Modal extends React.PureComponent {
   };
 
   render() {
-    const { renderVideos, selectedVideoList, initialReqVideo, isSelected, errorFound } =
+    const { renderVideos, selectedVideoList, initialReqVideo, isSelected, errorFound, sessionID } =
       this.state;
+    console.log("sessionId here in modal >>>>>", sessionID)
     return (
       <div className="modal display-block">
-        <section className="modal-main">
+        {sessionID?.length > 0 ? <section className="modal-main">
           {this.props.children}
           <div className="modal-header">
             <h2>Select Video</h2>
@@ -248,7 +250,7 @@ export default class Modal extends React.PureComponent {
               <GridLayout
                 videos={renderVideos}
                 isSelected={isSelected}
-                checkFiles = {errorFound}
+                checkFiles={errorFound}
                 loadContent={this.loadMore}
                 handleSelect={this.selectingVideos}
                 selectedVideoList={selectedVideoList}
@@ -258,7 +260,7 @@ export default class Modal extends React.PureComponent {
               <ListLayout
                 videos={renderVideos}
                 isSelected={isSelected}
-                checkFiles = {errorFound}
+                checkFiles={errorFound}
                 loadContent={this.loadMore}
                 handleSelect={this.selectingVideos}
                 selectedVideoList={selectedVideoList}
@@ -283,7 +285,9 @@ export default class Modal extends React.PureComponent {
               </button>
             </div>
           </div>
-        </section>
+        </section> : ""
+        }
+
       </div>
     );
   }
