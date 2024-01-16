@@ -285,7 +285,57 @@ export default class Modal extends React.PureComponent {
               </button>
             </div>
           </div>
-        </section> : ""
+        </section> : <section className="modal-main">
+          <div className="container">
+            <form onSubmit={this.userLogin} className="main-container">
+              <div className="image-container">
+                <img src={Logo} alt="" className="logoImage" />
+                <div className="parent-container">
+                  <div>
+                    <p>
+                      Login to your intelliganceBank account by entering your
+                      credentials below.
+                    </p>
+                  </div>
+                  <div className="child-container">
+                    <span htmlFor="url" className="urltext">URL (without https://)</span>
+                    <div>
+                      <input type="url" id="url" name="url" className="ib-url" required />
+                      <span>.intelligencebank.com</span>
+                    </div>
+                    <label className="checkbox-container">
+                      <input type="checkbox" />
+                      <span className="checkmark"> Custom URL</span>
+                    </label>
+                    <label htmlFor="email">Email:</label>
+                    <input
+                      type="email"
+                      id="email"
+                      name="email"
+                      className="input-email"
+                      required
+                    />
+
+                    <label htmlFor="password" className="password-field">Password:</label>
+                    <input
+                      type="password"
+                      id="password"
+                      name="password"
+                      className="input-password"
+                      required
+                    />
+
+                    <button type="submit" className="login-button">Login</button>
+                  </div>
+                  <label className="checkbox-login">
+                    <input type="checkbox" />
+                    <span className="browser-login">Browser Login (for SSO Users)</span>
+                  </label>
+                </div>
+              </div>
+            </form>
+          </div>
+        </section>
         }
 
       </div>
