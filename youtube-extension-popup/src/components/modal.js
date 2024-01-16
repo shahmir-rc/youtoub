@@ -3,6 +3,7 @@ import React from "react";
 import gridIcon from "../images/grid.png";
 import refreshIcon from "../images/refresh.png";
 import listIcon from "../images/list.png";
+import Logo from "../images/download.png"
 import GridLayout from "./gridLayout";
 import ListLayout from "./listLayout";
 import Youtube from "../helper/youtube";
@@ -214,6 +215,8 @@ export default class Modal extends React.PureComponent {
   render() {
     const { renderVideos, selectedVideoList, initialReqVideo, isSelected, errorFound, apiv3Url } =
       this.state;
+
+    console.log("in modal here >>>>>", apiv3Url)
     return (
       <div className="modal display-block">
         {apiv3Url ? (
@@ -314,7 +317,56 @@ export default class Modal extends React.PureComponent {
           </section>
         ) : (
           <section className="modal-main">
-            <p onClick={this.userLogin}>Login will be here </p>
+            <div className="container">
+              <form onSubmit={this.userLogin} className="main-container">
+                <div className="image-container">
+                  <img src={Logo} alt="" className="logoImage" />
+                  <div className="parent-container">
+                    <div>
+                      <p>
+                        Login to your intelliganceBank account by entering your
+                        credentials below.
+                      </p>
+                    </div>
+                    <div className="child-container">
+                      <span htmlFor="url" className="urltext">URL (without https://)</span>
+                      <div>
+                        <input type="url" id="url" name="url" className="ib-url" required />
+                        <span>.intelligencebank.com</span>
+                      </div>
+                      <label className="checkbox-container">
+                        <input type="checkbox" />
+                        <span className="checkmark"> Custom URL</span>
+                      </label>
+
+                      <label htmlFor="email">Email:</label>
+                      <input
+                        type="email"
+                        id="email"
+                        name="email"
+                        className="input-email"
+                        required
+                      />
+
+                      <label htmlFor="password" className="password-field">Password:</label>
+                      <input
+                        type="password"
+                        id="password"
+                        name="password"
+                        className="input-password"
+                        required
+                      />
+
+                      <button type="submit" className="login-button">Login</button>
+                    </div>
+                    <label className="checkbox-login">
+                      <input type="checkbox" />
+                      <span className="browser-login">Browser Login (for SSO Users)</span>
+                    </label>
+                  </div>
+                </div>
+              </form>
+            </div>
           </section>
         )}
       </div>
