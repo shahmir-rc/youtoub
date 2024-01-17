@@ -1,4 +1,84 @@
-html, body, div, span, applet, object, iframe, h1, h2, h3, h4, h5, h6, p, blockquote, pre, a, abbr, acronym, address, big, cite, code, del, dfn, em, img, ins, kbd, q, s, samp, small, strike, strong, sub, sup, tt, var, b, u, i, center, dl, dt, dd, ol, ul, li, fieldset, form, label, legend, table, caption, tbody, tfoot, thead, tr, th, td, article, aside, canvas, details, embed, figure, figcaption, footer, header, hgroup, menu, nav, output, ruby, section, summary, time, mark, audio, video {
+html,
+body,
+div,
+span,
+applet,
+object,
+iframe,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+blockquote,
+pre,
+a,
+abbr,
+acronym,
+address,
+big,
+cite,
+code,
+del,
+dfn,
+em,
+img,
+ins,
+kbd,
+q,
+s,
+samp,
+small,
+strike,
+strong,
+sub,
+sup,
+tt,
+var,
+b,
+u,
+i,
+center,
+dl,
+dt,
+dd,
+ol,
+ul,
+li,
+fieldset,
+form,
+label,
+legend,
+table,
+caption,
+tbody,
+tfoot,
+thead,
+tr,
+th,
+td,
+article,
+aside,
+canvas,
+details,
+embed,
+figure,
+figcaption,
+footer,
+header,
+hgroup,
+menu,
+nav,
+output,
+ruby,
+section,
+summary,
+time,
+mark,
+audio,
+video {
   margin: 0;
   padding: 0;
   border: 0;
@@ -10,19 +90,34 @@ html, body, div, span, applet, object, iframe, h1, h2, h3, h4, h5, h6, p, blockq
 
 /* HTML5 display-role reset for older browsers */
 
-article, aside, details, figcaption, figure, footer, header, hgroup, menu, nav, section {
+article,
+aside,
+details,
+figcaption,
+figure,
+footer,
+header,
+hgroup,
+menu,
+nav,
+section {
   display: block;
 }
 
-ol, ul {
+ol,
+ul {
   list-style: none;
 }
 
-blockquote, q {
+blockquote,
+q {
   quotes: none;
 }
 
-blockquote::before, blockquote::after, q::before, q::after {
+blockquote::before,
+blockquote::after,
+q::before,
+q::after {
   content: '';
   content: none;
 }
@@ -145,7 +240,8 @@ input#search:hover {
   right: 30px;
 }
 
-.modal .modal-body .list-layout, .grid-layout {
+.modal .modal-body .list-layout,
+.grid-layout {
   border: 1px solid #e8e8e9;
 }
 
@@ -157,7 +253,8 @@ input#search:hover {
   font-weight: 700;
 }
 
-.modal .modal-body .table-body, .grid-body {
+.modal .modal-body .table-body,
+.grid-body {
   height: 300px;
   overflow-y: auto;
 }
@@ -172,7 +269,9 @@ input#search:hover {
   padding: 25px 0 0 20px;
 }
 
-.modal .modal-body .list-layout, .grid-layout .table-body, .grid-body ul {
+.modal .modal-body .list-layout,
+.grid-layout .table-body,
+.grid-body ul {
   max-height: none;
   overflow-y: hidden;
   padding-bottom: 0;
@@ -455,9 +554,11 @@ input#search:hover {
   0% {
     transform: scale(0);
   }
+
   50% {
     transform: scale(1);
   }
+
   100% {
     transform: scale(0);
   }
@@ -469,44 +570,59 @@ input#search:hover {
 }
 
 /* for login interface */
+.modal .container {
+  width: 100%;
+  height: fit-content;
+  min-height: 590px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #282829;
+}
 
-.modal .main-container{
+.modal .container .main-container {
   max-width: 770px;
-  height: 500px;
+  height: auto;
   margin-left: auto;
   margin-right: auto;
   display: flex;
   justify-content: center;
 }
-.modal .image-container{
+
+.modal .container .image-container {
   display: flex;
   flex-direction: column;
   align-items: center;
 }
-.modal .logoImage{
-  max-width: 300px;
-  max-height: 120px;
+
+.modal .container .logo {
+  width: 300px;
+  height: 50px;
+  margin-left: auto;
+  margin-right: auto;
 }
-.modal .parent-container{
+
+.modal .container .parent-container {
   max-width: 360px;
-  height: 472px;
-  padding: 16px;
+  padding: 24px;
   background: white;
   border-radius: 8px;
-  
 }
-.modal .child-container{
- 
+
+.modal .container .child-container {
+
   display: flex;
   flex-direction: column;
   justify-items: center;
 
 }
-.modal .urltext{
+
+.modal .container .urltext {
   font-style: normal;
   font-weight: 600px;
 }
-.modal .ib-url{
+
+.modal .container .ib-url {
   padding-top: 7px;
   padding-bottom: 7px;
   padding-left: 12px;
@@ -514,16 +630,16 @@ input#search:hover {
   border-radius: 4px;
   border: 1px solid #BFBFBF;
 }
-.modal .checkbox-container{
-  margin-top: 8px;
+
+.modal .container .url-container {
   margin-bottom: 20px;
 }
-.modal .checkmark{
-  font-size: 14px;
-  line-height: 20px;
-  
+
+.modal .container label {
+  margin-bottom: 4px;
 }
-.modal .input-email{
+
+.modal .container .input-email {
   max-width: 360px;
   padding-top: 7px;
   padding-bottom: 7px;
@@ -533,10 +649,12 @@ input#search:hover {
   border-radius: 4px;
   border: 1px solid #BFBFBF;
 }
-.modal .password-field{
+
+.modal .container .password-field {
   margin-top: 20px;
 }
-.modal .input-password{
+
+.modal .container .input-password {
   padding-top: 7px;
   padding-bottom: 7px;
   padding-left: 12px;
@@ -545,21 +663,15 @@ input#search:hover {
   border-radius: 4px;
   border: 1px solid #BFBFBF;
 }
-.modal .login-button{
-margin-top: 20px;
-padding-top: 7px;
-padding-bottom: 7px;
-padding-left: 12px;
-padding-right: 12px;
-background-color: #F68D32;
-border: none;
-border-radius: 4px;
-}
-.modal .checkbox-login{
-  display: flex;
-  justify-content: center;
+
+.modal .container .login-button {
   margin-top: 20px;
-}
-.modal .browser-login{
-  font-size: 14px;
+  padding-top: 7px;
+  padding-bottom: 7px;
+  padding-left: 12px;
+  padding-right: 12px;
+  background-color: #F68D32;
+  border: none;
+  border-radius: 4px;
+  margin-bottom: 16px;
 }

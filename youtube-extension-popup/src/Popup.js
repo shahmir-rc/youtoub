@@ -57,6 +57,7 @@ export class Popup extends React.Component {
 
   render() {
     const { config, selectedVideosList } = this.state;
+    console.log("config here >>>>> in modal",config)
     return (
       <div>
         {config && (

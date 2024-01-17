@@ -287,9 +287,9 @@ export default class Modal extends React.PureComponent {
           </div>
         </section> : <section className="modal-main">
           <div className="container">
-            <form onSubmit={this.userLogin} className="main-container">
+            <form className="main-container">
               <div className="image-container">
-                <img src={Logo} alt="" className="logoImage" />
+                <img src="https://images.contentstack.io/v3/assets/blt221fb47986d5e67e/blt2cb29b8ea92a9836/65a7bfeebad37d43f89df7de/download.png" alt="" className="logo" />
                 <div className="parent-container">
                   <div>
                     <p>
@@ -299,38 +299,18 @@ export default class Modal extends React.PureComponent {
                   </div>
                   <div className="child-container">
                     <span htmlFor="url" className="urltext">URL (without https://)</span>
-                    <div>
+                    <div className="url-container">
                       <input type="url" id="url" name="url" className="ib-url" required />
                       <span>.intelligencebank.com</span>
                     </div>
-                    <label className="checkbox-container">
-                      <input type="checkbox" />
-                      <span className="checkmark"> Custom URL</span>
-                    </label>
                     <label htmlFor="email">Email:</label>
-                    <input
-                      type="email"
-                      id="email"
-                      name="email"
-                      className="input-email"
-                      required
-                    />
+                    <input type="email" id="email" name="email" className="input-email" required />
 
                     <label htmlFor="password" className="password-field">Password:</label>
-                    <input
-                      type="password"
-                      id="password"
-                      name="password"
-                      className="input-password"
-                      required
-                    />
+                    <input type="password" id="password" name="password" className="input-password" required />
 
                     <button type="submit" className="login-button">Login</button>
                   </div>
-                  <label className="checkbox-login">
-                    <input type="checkbox" />
-                    <span className="browser-login">Browser Login (for SSO Users)</span>
-                  </label>
                 </div>
               </div>
             </form>
