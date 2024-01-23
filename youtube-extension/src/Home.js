@@ -25,28 +25,30 @@ export class Home extends React.Component {
       const { items } = extension.field.getData();
       extension.window.enableAutoResizing();
       if (items && typeof items[0] !== "object") {
-        Youtube.initalizingVideoList(extension.config, items.toString())
-          .then((videoList) => {
-            const modifiedVideo = videoList.data.items.map((video) => {
-              let newVideo = video;
-              newVideo["id"] = { kind: "youtube#video", videoId: video.id };
-              return newVideo;
-            });
-            this.setState(
-              {
-                config: extension.config,
-                videoList: modifiedVideo,
-              },
-              () => {
-                this.extension = extension;
-                extension.window.enableAutoResizing();
-              }
-            );
-          })
-          .catch((err) => {
-            console.log(err);
-          });
+        // Youtube.initalizingVideoList(extension.config, items.toString())
+        //   .then((videoList) => {
+        //     const modifiedVideo = videoList.data.items.map((video) => {
+        //       let newVideo = video;
+        //       newVideo["id"] = { kind: "youtube#video", videoId: video.id };
+        //       return newVideo;
+        //     });
+        //     this.setState(
+        //       {
+        //         config: extension.config,
+        //         videoList: modifiedVideo,
+        //       },
+        //       () => {
+        //         this.extension = extension;
+        //         extension.window.enableAutoResizing();
+        //       }
+        //     );
+        //   })
+        //   .catch((err) => {
+        //     console.log(err);
+        //   });
+        console.log("no assest found")
       } else {
+        console.log("assets found")
         this.setState(
           {
             config: extension.config,
