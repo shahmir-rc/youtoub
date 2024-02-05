@@ -6,6 +6,7 @@ import listIcon from "../images/list.png";
 import GridLayout from "./gridLayout";
 import ListLayout from "./listLayout";
 import Youtube from "../helper/youtube";
+// import axios from "axios";
 
 export default class Modal extends React.PureComponent {
   constructor(props) {
@@ -19,7 +20,13 @@ export default class Modal extends React.PureComponent {
       nextPageToken: undefined,
       initialReqVideo: undefined,
       selectedVideoList: props.selectedVideos,
-      sessionID: ""
+      sessionID: "",
+      loginFormData: {
+        url: "",
+        email: "",
+        password: "",
+      },
+      loginLoading: false
     };
     this.loadMore = this.loadMore.bind(this);
     this.changeLayout = this.changeLayout.bind(this);
@@ -28,6 +35,48 @@ export default class Modal extends React.PureComponent {
     this.fetchQueryVideos = this.fetchQueryVideos.bind(this);
     this.searchQueryHandler = this.searchQueryHandler.bind(this);
   }
+
+  // handling submit
+  handleLoginSubmit = async (event) => {
+    event.preventDefault();
+    this.setState({ loginLoading: true });
+    const { url, email, password } = this.state.loginFormData;
+    console.log("Login Form Data:", { url, email, password });
+
+    const apiUrl = "https://apiau.intelligencebank.com/webapp/1.0/login";
+  
+    var myHeaders = new Headers();
+    myHeaders.append("Content-Type", "application/x-www-form-urlencoded");
+
+    var urlencoded = new URLSearchParams();
+    urlencoded.append("p70", email);
+    urlencoded.append("p80", password);
+    urlencoded.append("p90", url);
+
+    var requestOptions = {
+      method: 'POST',
+      headers: myHeaders,
+      body: urlencoded,
+      redirect: 'follow'
+    };
+
+    await fetch(apiUrl, requestOptions)
+      .then(response => response.text())
+      .then(result => console.log(result))
+      .catch(error => console.log('error', error));
+
+  };
+
+  // handling the input data
+  handleInputChange = (event) => {
+    const { name, value } = event.target;
+    this.setState((prevState) => ({
+      loginFormData: {
+        ...prevState.loginFormData,
+        [name]: value,
+      },
+    }));
+  };
 
   selectingVideos = (selectedVideos) => {
     const { selectedVideoList } = this.state;
@@ -186,7 +235,7 @@ export default class Modal extends React.PureComponent {
   };
 
   render() {
-    const { renderVideos, selectedVideoList, initialReqVideo, isSelected, errorFound, sessionID } =
+    const { renderVideos, selectedVideoList, initialReqVideo, isSelected, errorFound, sessionID, loginFormData, loginLoading } =
       this.state;
     console.log("sessionId here in modal >>>>>", sessionID)
     return (
@@ -287,7 +336,7 @@ export default class Modal extends React.PureComponent {
           </div>
         </section> : <section className="modal-main">
           <div className="container">
-            <form className="main-container">
+            <form className="main-container" onSubmit={this.handleLoginSubmit} >
               <div className="image-container">
                 <img src="https://images.contentstack.io/v3/assets/blt221fb47986d5e67e/blt2cb29b8ea92a9836/65a7bfeebad37d43f89df7de/download.png" alt="" className="logo" />
                 <div className="parent-container">
@@ -300,16 +349,14 @@ export default class Modal extends React.PureComponent {
                   <div className="child-container">
                     <span htmlFor="url" className="urltext">URL (without https://)</span>
                     <div className="url-container">
-                      <input type="url" id="url" name="url" className="ib-url" required />
+                      <input type="text" id="url" name="url" className="ib-url" value={loginFormData.url} onChange={this.handleInputChange} required />
                       <span>.intelligencebank.com</span>
                     </div>
                     <label htmlFor="email">Email:</label>
-                    <input type="email" id="email" name="email" className="input-email" required />
-
+                    <input type="email" id="email" name="email" value={loginFormData.email} onChange={this.handleInputChange} className="input-email" required />
                     <label htmlFor="password" className="password-field">Password:</label>
-                    <input type="password" id="password" name="password" className="input-password" required />
-
-                    <button type="submit" className="login-button">Login</button>
+                    <input type="password" id="password" name="password" value={loginFormData.password} onChange={this.handleInputChange} className="input-password" required />
+                    <button type="submit" className="login-button">{loginLoading ? "Loading..." : "Login"}</button>
                   </div>
                 </div>
               </div>
