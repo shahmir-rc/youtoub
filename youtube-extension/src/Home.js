@@ -65,6 +65,7 @@ export class Home extends React.Component {
     })
 
     const receiveMessage = (event) => {
+      console.log("event recieved >>>>",event)
       const { data } = event;
       const { videoList } = this.state;
       if (data.getConfig) {
@@ -79,6 +80,9 @@ export class Home extends React.Component {
         );
       } else if (data.selectedVideosList) {
         this.saveExtensionData(data.selectedVideosList);
+      }
+      if(data.sessionData){
+        console.log("data here in recieve message >>>>",data)
       }
     };
     window.addEventListener("message", receiveMessage, false);
