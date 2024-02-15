@@ -7,7 +7,6 @@ import { WindowOpener } from "./components/window-opener";
 import ContentstackUIExtension from "@contentstack/ui-extensions-sdk";
 export class Home extends React.Component {
   constructor(props) {
-    console.log("props here >>>>",props)
     super(props);
     this.extension = {};
     this.state = {
@@ -19,9 +18,7 @@ export class Home extends React.Component {
     this.deleteVideo = this.deleteVideo.bind(this);
   }
   componentDidMount() {
-    console.log("in mount >>>>",ContentstackUIExtension)
     ContentstackUIExtension.init().then((extension) => {
-      console.log("extension data here >>>>>",extension)
       const { items } = extension.field.getData();
       extension.window.enableAutoResizing();
       if (items && typeof items[0] !== "object") {
@@ -60,12 +57,11 @@ export class Home extends React.Component {
           }
         );
       }
-    }).catch((error)=>{
-      console.log("error here >>>",error)
+    }).catch((error) => {
+      console.log("error here >>>", error)
     })
 
     const receiveMessage = (event) => {
-      console.log("event recieved >>>>",event)
       const { data } = event;
       const { videoList } = this.state;
       if (data.getConfig) {
@@ -81,8 +77,79 @@ export class Home extends React.Component {
       } else if (data.selectedVideosList) {
         this.saveExtensionData(data.selectedVideosList);
       }
-      if(data.sessionData){
-        console.log("data here in recieve message >>>>",data)
+      if (data.getSessionConfig) {
+        console.log("yes session data needed in popup sending")
+        // sending session data to popup
+        // let sessionID = null
+        // let clientid = null
+        // let baseApiUrl = null
+        // let expirationTime = null
+
+        // this.extension.store.get('intelligence_bank_session_token').then((value)=> sessionID=value);
+        // this.extension.store.get('intelligence_bank_client_token').then((value)=> clientid=value);
+        // this.extension.store.get('intelligence_bank_url').then((value)=> baseApiUrl=value);
+        // this.extension.store.get('intelligence_bank_expiration_token').then((value)=> expirationTime=value)
+        // console.log("outside session id from storage is >>>>>>>>.", sessionID)
+
+        // if (sessionID && clientid && baseApiUrl && expirationTime) {
+        //   console.log("inside session id from storage is >>>>>>>>.", sessionID)
+        //   event.source.postMessage(
+        //     {
+        //       message: "Sending session data to popup",
+        //       sessionData: {
+        //         sessionID: sessionID,
+        //         clientid: clientid,
+        //         baseApiUrl: baseApiUrl,
+        //         expirationTime: expirationTime
+        //       },
+        //     },
+        //     event.origin
+        //   );
+        // }
+
+        const promises = [
+          this.extension.store.get('intelligence_bank_session_token'),
+          this.extension.store.get('intelligence_bank_client_token'),
+          this.extension.store.get('intelligence_bank_url'),
+          this.extension.store.get('intelligence_bank_expiration_token')
+        ];
+
+        // Execute all promises concurrently
+        Promise.all(promises)
+          .then((values) => {
+            // Destructure the values array
+            const [sessionID, clientid, baseApiUrl, expirationTime] = values;
+            console.log("session id from storage is >>>>>>>>.", sessionID)
+
+            if (sessionID && clientid && baseApiUrl && expirationTime) {
+              console.log("inside session id from storage is >>>>>>>>.", sessionID)
+              event.source.postMessage({
+                message: "Sending session data to popup",
+                sessionData: {
+                  sessionID: sessionID,
+                  clientid: clientid,
+                  baseApiUrl: baseApiUrl,
+                  expirationTime: expirationTime
+                },
+              }, event.origin);
+            }
+          })
+          .catch((error) => {
+            console.error('Error: in all promises', error); // Handle any errors
+          });
+      }
+      if (data.sessionData) {
+        // getting session data from popup
+        const sessionData = data.sessionData
+        const { sid, clientid, apiV3url, logintimeoutperiod } = sessionData
+        // Calculate expiration time
+        const expirationTime = Date.now() + logintimeoutperiod * 1000;
+
+        //  setting data to session storage
+        this.extension.store.set('intelligence_bank_session_token', sid);
+        this.extension.store.set('intelligence_bank_client_token', clientid);
+        this.extension.store.set('intelligence_bank_url', apiV3url);
+        this.extension.store.set('intelligence_bank_expiration_token', expirationTime.toString())
       }
     };
     window.addEventListener("message", receiveMessage, false);
@@ -124,6 +191,7 @@ export class Home extends React.Component {
       Dragula([componentBackingInstance], options);
     }
   };
+
 
   render() {
     const { videoList, config } = this.state;
