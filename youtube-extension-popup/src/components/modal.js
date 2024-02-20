@@ -71,8 +71,8 @@ export default class Modal extends React.PureComponent {
       .then(response => response.text())
       .then(async (text) => {
         // Convert text to JSON
-        let initialFolders = null
-        let initialResources = null
+        let initialFolders = []
+        let initialResources = []
         let jsonData = JSON.parse(text);
         const { apiV3url, clientid, sid, logintimeoutperiod } = jsonData
 
@@ -81,7 +81,7 @@ export default class Modal extends React.PureComponent {
         const authenticatedUser = this.isAuthenticated(sid, expirationTime)
         if (authenticatedUser) {
           const folders = await this.getFolders(apiV3url, sid, clientid)
-          const resources = await this.getResources(apiV3url, sid, clientid)
+          const resources = await this.getResources(apiV3url, sid)
           if (!folders.error) {
             console.log("folders got here >>>>>>>>>>", folders)
             initialFolders = folders
@@ -284,7 +284,34 @@ export default class Modal extends React.PureComponent {
       prevProps.expirationTime !== this.props.expirationTime ||
       prevProps.baseApiUrl !== this.props.baseApiUrl
     ) {
-      this.isAuthenticated(this.props.sessionID, this.props.expirationTime);
+      const authenticateduser = this.isAuthenticated(this.props.sessionID, this.props.expirationTime);
+      if (authenticateduser) {
+        const getAssets = async () => {
+
+          let initialFolders = []
+          let initialResources = []
+          const folders = await this.getFolders(this.props.baseApiUrl, this.props.sessionID, this.props.clientid)
+          const resources = await this.getResources(this.props.baseApiUrl, this.props.sessionID)
+          if (!folders.error) {
+            console.log("folders got here >>>>>>>>>>", folders)
+            initialFolders = folders
+          }
+          if (!resources.error) {
+            console.log("resources here >>>>", resources)
+            initialResources = resources
+          }
+          this.setState(prevState => ({
+            ...prevState,
+            baseApiUrl: this.props.baseApiUrl,
+            clientId: this.props.clientid,
+            sessionID: this.props.sessionID,
+            renderFolders: initialFolders,
+            renderAssets: initialResources,
+          }));
+        }
+
+        getAssets()
+      }
     }
   }
 
@@ -415,10 +442,10 @@ export default class Modal extends React.PureComponent {
 
   render() {
     const { renderAssets, selectedVideoList, initialReqVideo,
-       isSelected, errorFound, 
-      loginFormData, loginLoading, isAuthenticatedUser, folders, resources } =
+      isSelected, errorFound,
+      loginFormData, loginLoading, isAuthenticatedUser, renderFolders } =
       this.state;
-    console.log("auth user here in modal >>>>>", isAuthenticatedUser, folders, resources)
+    console.log("auth user here in modal >>>>>", isAuthenticatedUser, renderFolders, renderAssets)
     if (isAuthenticatedUser) {
       return (
         <div className="modal display-block">
