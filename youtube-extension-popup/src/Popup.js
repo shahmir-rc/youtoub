@@ -10,6 +10,10 @@ export class Popup extends React.Component {
       message: "",
       config: undefined,
       selectedVideosList: [],
+      sessionID: null,
+      baseApiUrl: null,
+      expirationTime: null,
+      clientid: null,
     };
     this.onCloseWindow = this.onCloseWindow.bind(this);
   }
@@ -18,10 +22,16 @@ export class Popup extends React.Component {
       window.close();
     }
     window.opener.postMessage(
-      { message: "get youtube config and selected videos", getConfig: true },
+      { message: "get config and selected assets", getConfig: true },
+      "*"
+    );
+
+    window.opener.postMessage(
+      { message: "get session data", getSessionConfig: true },
       "*"
     );
     const receiveMessage = ({ data }) => {
+      console.log("recieved message in popup>>>>>>>>>>>>>>>", data)
       if (data.config) {
         this.setState({
           message: data.message,
@@ -34,30 +44,44 @@ export class Popup extends React.Component {
           selectedVideosList: data.selectedVideos,
         });
       }
+      if (data.sessionData) {
+        console.log("session data recieved in popup >>>>>>>>>", data.sessionData)
+        const { sessionID, expirationTime, clientid, baseApiUrl } = data.sessionData
+        this.setState(prevState => ({
+          ...prevState,
+          baseApiUrl: baseApiUrl,
+          clientid: clientid,
+          sessionID: sessionID,
+          expirationTime: expirationTime
+        }));
+      }
     };
     window.addEventListener("message", receiveMessage, false);
   }
-  onCloseWindow = (selectedVideos) => {
+  onCloseWindow = (selectedVideos, sessionData) => {
+    console.log("sessionData on the close window >>>>>", sessionData)
     selectedVideos.length > 0
       ? window.opener.postMessage(
-          {
-            message: "sending selected videos",
-            selectedVideosList: selectedVideos,
-          },
-          "*"
-        )
+        {
+          message: "sending selected videos",
+          selectedVideosList: selectedVideos,
+          sessionData: sessionData
+        },
+        "*"
+      )
       : window.opener.postMessage(
-          {
-            message: "Window closed sending selected videos",
-          },
-          "*"
-        );
+        {
+          message: "Window closed sending selected videos",
+          sessionData: sessionData
+        },
+        "*"
+      );
     window.close();
   };
 
   render() {
-    const { config, selectedVideosList } = this.state;
-    console.log("config here >>>>> in modal",config)
+    const { config, selectedVideosList, sessionID, clientid, expirationTime, baseApiUrl } = this.state;
+    console.log("config here >>>>> in modal", config)
     return (
       <div>
         {config && (
@@ -65,6 +89,10 @@ export class Popup extends React.Component {
             config={config}
             closeWindow={this.onCloseWindow}
             selectedVideos={selectedVideosList}
+            sessionID={sessionID}
+            clientid={clientid}
+            expirationTime={expirationTime}
+            baseApiUrl={baseApiUrl}
           />
         )}
       </div>

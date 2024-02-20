@@ -6,36 +6,36 @@ export default class GridLayout extends React.PureComponent {
   render() {
     const {
       isSelected,
-      videos,
-      selectedVideoList,
+      assets,
+      selectedAssetList,
       handleSelect,
       loadContent,
-      totalVideos,
+      totalAssets,
       checkFiles,
     } = this.props;
-    const renderVideos = isSelected ? selectedVideoList : videos;
+    const renderAssets = isSelected ? selectedAssetList : assets;
     return (
       <ul className="grid-layout">
         <div className="grid-body">
-          {renderVideos.length > 0 ? (
+          {renderAssets.length > 0 ? (
             <>
               <ul>
-                {renderVideos?.map((video) => {
-                  const checked = selectedVideoList.some(
-                    (check) => check.id.videoId === video.id.videoId
+                {renderAssets?.map((asset) => {
+                  const checked = selectedAssetList.some(
+                    (check) => check.id === asset.id
                   );
                   return (
                     <li
-                      title={video.snippet.title}
-                      id={video.id.videoId}
-                      key={video.id.videoId}
+                      title={asset.name}
+                      id={asset.id}
+                      key={asset.id}
                       className={checked ? "active" : ""}
                       onClick={(event) => {
                         const liElement = event.currentTarget;
-                        !checked && video.id.videoId === liElement.id
+                        !checked && asset.id === liElement.id
                           ? liElement.classList.add("active")
                           : liElement.classList.remove("active");
-                        handleSelect(video);
+                        handleSelect(asset);
                         const checkbox =
                           liElement.childNodes[0].childNodes[0].childNodes[0];
 
@@ -48,14 +48,14 @@ export default class GridLayout extends React.PureComponent {
                             type="checkbox"
                             className="cs"
                             defaultChecked={checked}
-                            id={`checkbox-${video.id.videoId}`}
+                            id={`checkbox-${asset.id}`}
                             onChange={(event) => {
                               const style =
                                 event.target.parentNode.parentNode.parentNode;
-                              !checked && video.id.videoId === style.id
+                              !checked && asset.id === style.id
                                 ? style.classList.add("active")
                                 : style.classList.remove("active");
-                              handleSelect(video);
+                              handleSelect(asset);
                             }}
                           />
                           <span className="lbl"></span>
@@ -65,10 +65,10 @@ export default class GridLayout extends React.PureComponent {
                         <span
                           className="img"
                           style={{
-                            backgroundImage: `url(${video.snippet.thumbnails.medium.url})`,
+                            backgroundImage: `url(${asset.thumbnail})`,
                           }}
                         ></span>
-                        <span className="name">{video.snippet.title}</span>
+                        <span className="name">{asset.name}</span>
                       </div>
                     </li>
                   );
@@ -79,7 +79,7 @@ export default class GridLayout extends React.PureComponent {
                 onClick={loadContent}
                 style={{
                   display:
-                    isSelected || videos.length + 1 > totalVideos
+                    isSelected || assets.length + 1 > totalAssets
                       ? "none"
                       : "block",
                 }}

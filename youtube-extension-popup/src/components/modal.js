@@ -3,8 +3,8 @@ import React from "react";
 import gridIcon from "../images/grid.png";
 import refreshIcon from "../images/refresh.png";
 import listIcon from "../images/list.png";
-// import GridLayout from "./gridLayout";
-// import ListLayout from "./listLayout";
+import GridLayout from "./gridLayout";
+import ListLayout from "./listLayout";
 import Youtube from "../helper/youtube";
 // import axios from "axios";
 
@@ -14,21 +14,26 @@ export default class Modal extends React.PureComponent {
     this.state = {
       isGrid: true,
       searchQuery: "",
-      renderVideos: [],
+      renderAssets: [],
+      renderFolders: [],
       errorFound: false,
       isSelected: false,
       nextPageToken: undefined,
       initialReqVideo: undefined,
       selectedVideoList: props.selectedVideos,
-      sessionID: "",
-      clienId: "",
-      baseApiUrl: "",
+      sessionID: this.props.sessionID,
+      clienId: this.props.clientid,
+      expirationTime: this.props.expirationTime,
+      baseApiUrl: this.props.baseApiUrl,
+      resources: null,
+      fullResponse: {},
       loginFormData: {
         url: "",
         email: "",
         password: "",
       },
-      loginLoading: false
+      loginLoading: false,
+      isAuthenticatedUser: false,
     };
     this.loadMore = this.loadMore.bind(this);
     this.changeLayout = this.changeLayout.bind(this);
@@ -64,22 +69,117 @@ export default class Modal extends React.PureComponent {
 
     await fetch(apiUrl, requestOptions)
       .then(response => response.text())
-      .then(text => {
+      .then(async (text) => {
         // Convert text to JSON
+        let initialFolders = null
+        let initialResources = null
         let jsonData = JSON.parse(text);
-        const { apiV3url, clientid, sid } = jsonData
+        const { apiV3url, clientid, sid, logintimeoutperiod } = jsonData
 
-        this.setState(prevState => ({
-          ...prevState,
-          baseApiUrl: apiV3url,
-          clientId: clientid,
-          sessionID: sid
-        }));
-        console.log("json data here >>>>", jsonData);
+        const expirationTime = Date.now() + logintimeoutperiod * 1000;
+
+        const authenticatedUser = this.isAuthenticated(sid, expirationTime)
+        if (authenticatedUser) {
+          const folders = await this.getFolders(apiV3url, sid, clientid)
+          const resources = await this.getResources(apiV3url, sid, clientid)
+          if (!folders.error) {
+            console.log("folders got here >>>>>>>>>>", folders)
+            initialFolders = folders
+          }
+          if (!resources.error) {
+            console.log("resources here >>>>", resources)
+            initialResources = resources
+          }
+          this.setState(prevState => ({
+            ...prevState,
+            baseApiUrl: apiV3url,
+            clientId: clientid,
+            sessionID: sid,
+            renderFolders: initialFolders,
+            renderAssets: initialResources,
+            fullResponse: jsonData
+          }));
+        } else {
+          console.log("user authentication failed >>>>>>>>")
+        }
       })
-      .catch(error => console.log('error', error));
+      .catch(error => console.log('error', error)).finally(() => {
+        console.log("finalley >>>>>>!")
+      });
 
   };
+
+  getFolders = async (url, token, id) => {
+    var myHeaders = new Headers();
+    myHeaders.append("sid", token);
+
+    var requestOptions = {
+      method: 'GET',
+      headers: myHeaders,
+      redirect: 'follow'
+    };
+
+    try {
+      const response = await fetch(`${url}/api/3.0.0/${id}/folder.limit(100)`, requestOptions);
+      const text = await response.text();
+      // Convert text to JSON
+      const jsonData = JSON.parse(text);
+      const formattedData = jsonData?.response?.rows?.map((item) => {
+        return {
+          thumbnail: item?.thumbnail,
+          name: item?.name,
+          id: item?._id,
+          folders_count: item?.folders_count,
+          resources_count: item?.resources_count,
+          parent: item?.parent
+        }
+      })
+      return formattedData;
+    } catch (error) {
+      console.log('error', error);
+      throw error; // Re-throw the error to be handled elsewhere if needed
+    }
+  }
+
+  getResources = async (url, token) => {
+    var myHeaders = new Headers();
+    myHeaders.append("Content-Type", "application/json");
+    myHeaders.append("sid", token);
+
+    var raw = JSON.stringify({
+      "method": "GET",
+      "version": "3.0.0",
+      "client": "8yqy",
+      "table": "resource.limit(100)",
+      "query_params": {
+        "searchParams": {
+          "ib_folder_s": "",
+          "isSearching": true,
+          "wrapped_conditions": [
+            []
+          ]
+        }
+      }
+    });
+
+    var requestOptions = {
+      method: 'POST',
+      headers: myHeaders,
+      body: raw,
+      redirect: 'follow'
+    };
+
+    try {
+      const response = await fetch(`${url}/api/json`, requestOptions);
+      const text = await response.text();
+      // Convert text to JSON
+      const jsonData = JSON.parse(text);
+      return jsonData;
+    } catch (error) {
+      console.log('error', error);
+      throw error; // Re-throw the error to be handled elsewhere if needed
+    }
+  }
 
   // handling the input data
   handleInputChange = (event) => {
@@ -114,28 +214,78 @@ export default class Modal extends React.PureComponent {
     }
   };
 
-  componentDidMount() {
-    const { config } = this.props;
-    Youtube.initalizingVideoList(config)
-      .then((videoList) => {
-        videoList.data.items.length + 1 >=
-          videoList.data.pageInfo.totalResults &&
-          (document.getElementsByClassName("load-more")[0].style.display =
-            "none");
-        const errorFound = videoList.data.items.length === 0 ? true : false;
-        this.setState({
-          initialReqVideo: videoList.data,
-          renderVideos: videoList.data.items,
-          nextPageToken: videoList.data.nextPageToken,
-          errorFound
-        });
-      })
-      .catch((err) => {
-        console.log(err);
-        this.setState({
-          errorFound: true
-        })
-      });
+
+
+  // componentDidMount(prevProps) {
+  //   console.log("prev state",prevProps)
+  //   const { config } = this.props;
+  //   Youtube.initalizingVideoList(config)
+  //     .then((videoList) => {
+  //       videoList.data.items.length + 1 >=
+  //         videoList.data.pageInfo.totalResults &&
+  //         (document.getElementsByClassName("load-more")[0].style.display =
+  //           "none");
+  //       const errorFound = videoList.data.items.length === 0 ? true : false;
+  //       this.setState({
+  //         initialReqVideo: videoList.data,
+  //         renderAssets: videoList.data.items,
+  //         nextPageToken: videoList.data.nextPageToken,
+  //         errorFound
+  //       });
+  //     })
+  //     .catch((err) => {
+  //       console.log(err);
+  //       this.setState({
+  //         errorFound: true
+  //       })
+  //     });
+
+  // if (
+  //   prevProps.sessionID !== this.props.sessionID ||
+  //   prevProps.clientid !== this.props.clientid ||
+  //   prevProps.expirationTime !== this.props.expirationTime ||
+  //   prevProps.baseApiUrl !== this.props.baseApiUrl
+  // ) {
+  //   this.isAuthenticated(this.props.sessionID, this.props.expirationTime);
+  // }
+  // }
+
+  // new
+  componentDidUpdate(prevProps) {
+    if (prevProps.sessionID !== this.props.sessionID) {
+      this.setState(prevState => ({
+        ...prevState,
+        sessionID: this.props.sessionID,
+      }));
+    }
+    if (prevProps.clientid !== this.props.clientid) {
+      this.setState(prevState => ({
+        ...prevState,
+        clientId: this.props.clientid,
+      }));
+    }
+    if (prevProps.expirationTime !== this.props.expirationTime) {
+      this.setState(prevState => ({
+        ...prevState,
+        expirationTime: this.props.expirationTime,
+      }));
+    }
+    if (prevProps.baseApiUrl !== this.props.baseApiUrl) {
+      this.setState({ baseApiUrl: this.props.baseApiUrl });
+      this.setState(prevState => ({
+        ...prevState,
+        baseApiUrl: this.props.baseApiUrl,
+      }));
+    }
+
+    if (
+      prevProps.sessionID !== this.props.sessionID ||
+      prevProps.clientid !== this.props.clientid ||
+      prevProps.expirationTime !== this.props.expirationTime ||
+      prevProps.baseApiUrl !== this.props.baseApiUrl
+    ) {
+      this.isAuthenticated(this.props.sessionID, this.props.expirationTime);
+    }
   }
 
   UNSAFE_componentWillReceiveProps(newProps) {
@@ -153,7 +303,7 @@ export default class Modal extends React.PureComponent {
       .then((videoList) => {
         this.setState({
           initialReqVideo: videoList.data,
-          renderVideos: videoList.data.items,
+          renderAssets: videoList.data.items,
           nextPageToken: videoList.data.nextPageToken,
         });
       })
@@ -163,18 +313,18 @@ export default class Modal extends React.PureComponent {
   };
   loadMore = (event) => {
     const { config } = this.props;
-    const { searchQuery, nextPageToken, renderVideos, initialReqVideo } =
+    const { searchQuery, nextPageToken, renderAssets, initialReqVideo } =
       this.state;
-    if (renderVideos.length !== initialReqVideo.pageInfo.totalResults) {
+    if (renderAssets.length !== initialReqVideo.pageInfo.totalResults) {
       Youtube.initalizingVideoList(config, searchQuery, nextPageToken)
         .then((videoList) => {
-          let newVideos = this.state.renderVideos;
+          let newVideos = this.state.renderAssets;
           newVideos = newVideos.concat(videoList.data.items);
           newVideos.length + 1 >= initialReqVideo.pageInfo.totalResults &&
             (event.target.style.display = "none");
           const errorFound = newVideos.length === 0 ? true : false
           this.setState({
-            renderVideos: newVideos,
+            renderAssets: newVideos,
             nextPageToken: videoList.data.nextPageToken,
             errorFound
           });
@@ -189,10 +339,10 @@ export default class Modal extends React.PureComponent {
   };
 
   sendAndClose = (closeandsend) => {
-    const { selectedVideoList } = this.state;
+    const { selectedVideoList, fullResponse } = this.state;
     closeandsend
-      ? this.props.closeWindow(selectedVideoList)
-      : this.props.closeWindow([]);
+      ? this.props.closeWindow(selectedVideoList, fullResponse)
+      : this.props.closeWindow([], fullResponse);
   };
 
   handleClick() {
@@ -228,7 +378,7 @@ export default class Modal extends React.PureComponent {
         const errorFound = queryVideos.data.items.length === 0 ? true : false
         this.setState({
           initialReqVideo: queryVideos.data,
-          renderVideos: queryVideos.data.items,
+          renderAssets: queryVideos.data.items,
           nextPageToken: queryVideos.data.nextPageToken,
           errorFound
         });
@@ -242,19 +392,34 @@ export default class Modal extends React.PureComponent {
     Youtube.initializeSearchField(config, searchQuery).then((queryVideos) => {
       this.setState({
         initialReqVideo: queryVideos.data,
-        renderVideos: queryVideos.data.items,
+        renderAssets: queryVideos.data.items,
         nextPageToken: queryVideos.data.nextPageToken,
       });
     });
   };
 
+  // authentication
+  isAuthenticated(token, expirationTime) {
+    // Check if token exists and is not expired
+    if (!!token && expirationTime && Date.now() < parseInt(expirationTime, 10)) {
+      this.setState(prevState => ({
+        ...prevState,
+        isAuthenticatedUser: true
+      }))
+
+      return true
+    } else {
+      return false
+    }
+  }
+
   render() {
-    const { renderVideos, selectedVideoList, initialReqVideo,
-      //  isSelected, errorFound, 
-      sessionID, loginFormData, loginLoading } =
+    const { renderAssets, selectedVideoList, initialReqVideo,
+       isSelected, errorFound, 
+      loginFormData, loginLoading, isAuthenticatedUser, folders, resources } =
       this.state;
-    console.log("sessionId here in modal >>>>>", sessionID)
-    if (sessionID?.length > 1) {
+    console.log("auth user here in modal >>>>>", isAuthenticatedUser, folders, resources)
+    if (isAuthenticatedUser) {
       return (
         <div className="modal display-block">
 
@@ -292,7 +457,7 @@ export default class Modal extends React.PureComponent {
                   />
                   <img
                     src={this.state.isGrid ? gridIcon : listIcon}
-                    // onClick={this.changeLayout}
+                    onClick={this.changeLayout}
                     alt="view-option"
                   />
                 </div>
@@ -313,32 +478,30 @@ export default class Modal extends React.PureComponent {
                   </span>
                 )}
                 <span className="video-count">
-                  showing {renderVideos.length} of{" "}
+                  showing {renderAssets.length} of{" "}
                   {initialReqVideo?.pageInfo.totalResults} assets
                 </span>
               </div>
               {this.state.isGrid ? (
-                <p>grid here</p>
-                // <GridLayout
-                //   videos={renderVideos}
-                //   isSelected={isSelected}
-                //   checkFiles={errorFound}
-                //   loadContent={this.loadMore}
-                //   handleSelect={this.selectingVideos}
-                //   selectedVideoList={selectedVideoList}
-                //   totalVideos={initialReqVideo && initialReqVideo.pageInfo.totalResults}
-                // />
+                <GridLayout
+                  assets={renderAssets}
+                  isSelected={isSelected}
+                  checkFiles={errorFound}
+                  loadContent={this.loadMore}
+                  handleSelect={this.selectingVideos}
+                  selectedAssetList={selectedVideoList}
+                  totalAssets={initialReqVideo && initialReqVideo.pageInfo.totalResults}
+                />
               ) : (
-                <p>list here </p>
-                // <ListLayout
-                //   videos={renderVideos}
-                //   isSelected={isSelected}
-                //   checkFiles={errorFound}
-                //   loadContent={this.loadMore}
-                //   handleSelect={this.selectingVideos}
-                //   selectedVideoList={selectedVideoList}
-                //   totalVideos={initialReqVideo && initialReqVideo.pageInfo.totalResults}
-                // />
+                <ListLayout
+                  assets={renderAssets}
+                  isSelected={isSelected}
+                  checkFiles={errorFound}
+                  loadContent={this.loadMore}
+                  handleSelect={this.selectingVideos}
+                  selectedAssetList={selectedVideoList}
+                  totalAssets={initialReqVideo && initialReqVideo.pageInfo.totalResults}
+                />
               )}
             </div>
 
@@ -346,7 +509,7 @@ export default class Modal extends React.PureComponent {
               <div className="right">
                 <button
                   className="cancel-btn btn"
-                // onClick={() => this.sendAndClose(false)}
+                  onClick={() => this.sendAndClose(false)}
                 >
                   Cancel
                 </button>
